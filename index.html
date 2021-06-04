@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+
+    </style>
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <script src="js/jquery.js"></script>
+    <script src="js/popper.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <main class="container" style="text-align: center;">
+        <h1 class="text-success">Welcome to SoftAmplify Bank Web App</h1>
+        <div class="form-group">
+            <select style="text-align: center;" class="form-control w-50" name="operation" id="operation">
+                <option value="">Choose what to do</option>
+                <option value="create">Create bank account</option>
+                <option value="withdraw">Withdraw</option>
+                <option value="deposit">Deposit</option>
+                <option value="transaction_details">Show Transaction Details</option>
+                <option value="transfer">Transfer</option>
+            </select>
+        </div>
+        <button class="btn btn-dark" type="submit" onclick="doit()">Submit</button>
+    </main>
+    <main class="form-group" style="padding-left: 50%;" id="main"></main>
+    <div id="nam"></div>
+</body>
+</html>
+<!-- <input type="email" name="mail" id="ma" required> -->
+
+<script>
+    let arr = [];
+    arr = JSON.parse(localStorage.getItem("users"))
+    localStorage.setItem("users", JSON.stringify(arr));
+    let nam = document.getElementById("nam")
+    let main = document.getElementById("main") 
+    let string = document.getElementById("string1")
+    let selectsValue = document.getElementById("operation")
+    let doit = () => {
+        selectValue = selectsValue.value;
+        console.log(selectValue);
+        if (selectValue == "create") {
+            main.innerHTML = `
+            Your name: <input type="text" id="name" class="form-control w-50" required> <br/>
+             Email Address: <input type="email" id="email" class="form-control w-50" required><br/>
+            <button type="submit" class="btn btn-dark" onclick="getName_email()">Submit</button>
+            `
+        } else if (selectValue == "withdraw") {
+            console.log("Withdraw how much");
+            main.innerHTML = `
+                Account to withdraw from: <input type="text" id="accname" class="form-control w-50" required><br/>
+                <button type="submit" class="btn btn-dark" onclick="withdraw()">Submit</button>
+            `
+        } else if (selectValue == "deposit") {
+            console.log("Deposit how much");
+            main.innerHTML = `
+                Account you want to credit: <input type="text" id="depacc" class="form-control w-50" required><br/>
+                <button type="submit" class="btn btn-dark" onclick="deposit()">Submit</button>
+            `
+        } else if (selectValue == "transaction_details") {
+            console.log("history");
+            main.innerHTML = `
+                Account you want to credit: <input type="text" id="depacc" class="form-control w-50" required><br/>
+                <button type="submit" class="btn btn-dark" onclick="transactions()">Submit</button>
+            `
+        } else if (selectValue == "transfer") {
+            console.log("Transfer to who");
+        } else {
+            console.log("Sorry you have to pick a operation for me operate on");
+        }
+        selectsValue.value = ""
+        nam.innerHTML = ``
+    }
+
+    let transactions = () => {
+        
+    }
+    var amt_depo;
+    
+    let deposit = () => {
+        var depacc = document.getElementById("depacc").value;
+        console.log(depacc);
+        var validity;
+        arr = JSON.parse(localStorage.getItem("users"));
+        for (let index = 0; index < arr.length; index++) {
+            if (arr[index].name == depacc) {
+                validity = true;
+                main.innerHTML = `
+                    how much do you want to deposit: <input type="number" name="" id="depovalue" class="form-control w-50" required><br/>
+                    <button class="btn btn-success" onclick="accept(${index})">Submit</button>
+                `
+               amt_depo = document.getElementById("depovalue");
+
+                break
+            } else {
+               validity = false;
+            }   
+        }
+        
+    }
+
+    let accept = (location) => {
+        arr = JSON.parse(localStorage.getItem("users"));
+        arr[location].balance += parseFloat(amt_depo.value);
+        localStorage.setItem("users", JSON.stringify(arr));
+        
+    }
+
+    let withdraw = () => {
+        var accName = document.getElementById("accname").value;
+        var valid;
+        arr = JSON.parse(localStorage.getItem("users"))
+        
+        for (let index = 0; index < arr.length; index++) {
+            if (arr[index].name == accName) {
+                valid = true;
+                var amount_to_withdraw = parseFloat(prompt("how much do you want to withdraw: "))
+                if (arr[index].balance >= amount_to_withdraw) {
+                    nam.innerHTML = `<h1>Transaction completed successfully. You have been debited #${amount_to_withdraw}</h1>`
+                    arr[index].balance -= amount_to_withdraw;
+                    localStorage.setItem("users", JSON.stringify(arr));
+                } else {
+                    alert("you dont have sufficient fund")
+                    nam.innerHTML = `Sorry Insufficient Fund.<br/>Kindly fund your bank account.`
+                }
+                break
+                
+            } else {
+                valid = false;
+            } 
+        }
+        console.log(valid);
+        main.innerHTML = ``        
+    }
+
+    let getName_email = () => {
+        var name_of_user = document.getElementById("name").value;
+        var email_of_user = document.getElementById("email").value;
+        var obj = {
+            name: name_of_user,
+            email: email_of_user,
+            balance: 5000,
+        }
+        alert(`${obj.name}, you have successfuuly registered`)
+        console.log(obj.name);
+        arr.push(obj);
+        localStorage.setItem("users", JSON.stringify(arr));
+        console.log(arr);
+        document.getElementById("name").value = "";
+        document.getElementById("email").value = "";
+        main.innerHTML =""
+    }
+</script>
